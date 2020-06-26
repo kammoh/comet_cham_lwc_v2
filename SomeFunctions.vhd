@@ -53,14 +53,17 @@ package body SomeFunctions is
     -- Padding --------------------------------------------------
     function pad (I : in std_logic_vector(127 downto 0); bytes_Num : in natural) return std_logic_vector is
     variable temp : std_logic_vector(127 downto 0);
+    constant one         : unsigned(127 downto 0) := to_unsigned(1, 128);
+    variable shifted_one : unsigned(127 downto 0) := shift_left(one, 8*bytes_Num);
     begin
         if (bytes_Num = 0) then -- pad_I = 0*1
             temp(127 downto 1)  := (others => '0');
             temp(0)             := '1'; 
         elsif (bytes_Num < 16) then -- pad_I = 0*1 || I
-            temp(127 downto 8*bytes_Num + 1)    := (others => '0');
-            temp(8*bytes_Num)                   := '1';
-            temp(8*bytes_Num - 1 downto 0)      := I(8*bytes_Num - 1 downto 0);
+            temp := std_logic_vector(shifted_one or ((shifted_one - 1) and unsigned(I)));
+            -- temp(127 downto 8*bytes_Num + 1)    := (others => '0');
+            -- temp(8*bytes_Num)                   := '1';
+            -- temp(8*bytes_Num - 1 downto 0)      := I(8*bytes_Num - 1 downto 0);
         else -- pad_I = I
             temp := I;
         end if;
