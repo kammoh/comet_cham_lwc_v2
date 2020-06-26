@@ -92,7 +92,7 @@ begin
         bdi             => bdi,
         bdi_size        => bdi_size,
         key             => key,
-        bdo            => bdo,
+        bdo             => bdo,
         msg_auth        => msg_auth,
         CHAM_start      => CHAM_start,
         CHAM_done       => CHAM_done,

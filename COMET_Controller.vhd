@@ -11,7 +11,7 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.numeric_std.ALL;
 use work.SomeFunctions.all;
---use work.design_pkg.all;
+use work.NIST_LWAPI_pkg.all;
 
 -- Entity
 ----------------------------------------------------------------------------------
@@ -119,6 +119,7 @@ begin
     bdo_valid_bytes <= "1111"; -- Since we truncate the CT, bdo_valid_bytes can be always "1111"
     
     ---------------------------------------------------------------------------------
+    GEN_proc_Sync_SYNC_RST: if (not ASYNC_RSTN) generate
     Sync: process(clk)
     begin
         if rising_edge(clk) then
@@ -168,6 +169,57 @@ begin
             end if;
         end if;
     end process;
+    end generate GEN_proc_Sync_SYNC_RST;
+    
+    GEN_proc_Sync_ASYNC_RSTN: if (ASYNC_RSTN) generate
+    Sync: process(clk, rst)
+    begin
+        if (rst = '0') then
+            state   <= idle;
+        elsif rising_edge(clk) then
+            state   <= next_state;
+        
+            if (ctr_words_rst = '1') then
+                ctr_words   <= "000";
+            elsif (ctr_words_inc = '1') then
+                ctr_words   <= std_logic_vector(unsigned(ctr_words) + 1);
+            end if;
+            
+            if (ctr_bytes_rst = '1') then
+                ctr_bytes   <= "00000";
+            elsif (ctr_bytes_inc = '1') then
+                ctr_bytes   <= std_logic_vector(unsigned(ctr_bytes) + unsigned(bdi_size));
+            elsif (ctr_bytes_dec = '1') then
+                ctr_bytes   <= std_logic_vector(unsigned(ctr_bytes) - 4);
+            end if;
+
+            if (decrypt_rst = '1') then
+                decrypt_reg <= '0';
+            elsif (decrypt_set = '1') then
+                decrypt_reg <= '1';
+            end if;
+            
+            if (bdi_eoi_rst = '1') then
+                bdi_eoi_reg   <= '0';
+            elsif (bdi_eoi_set = '1') then
+                bdi_eoi_reg   <= '1';
+            end if;
+            
+            if (bdi_eot_rst = '1') then
+                bdi_eot_reg   <= '0';
+            elsif (bdi_eot_set = '1') then
+                bdi_eot_reg   <= '1';
+            end if;
+            
+            if (first_ADM_rst = '1') then
+                first_ADM_reg <= '0';
+            elsif (first_ADM_set = '1') then
+                first_ADM_reg <= '1';
+            end if;
+                
+        end if;
+    end process;
+    end generate GEN_proc_Sync_ASYNC_RSTN;
     
     Controller: process(state, key, key_valid, key_update, bdi, bdi_valid, bdi_eot, bdi_eoi,
                         bdi_type, ctr_words, CHAM_done, bdo_ready, msg_auth_ready)

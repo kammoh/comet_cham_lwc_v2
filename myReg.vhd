@@ -22,8 +22,6 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
-use work.NIST_LWAPI_pkg.ALL;
-
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
@@ -54,7 +52,7 @@ architecture Behavioral of myReg is
 ------------------------------------------------------------
 begin
 
-    GEN_proc_Store_SYNC_RST: if (not ASYNC_RSTN) generate
+    -- always synchronous reset!
     Store: process(clk)
     begin
         if rising_edge(clk) then
@@ -65,19 +63,5 @@ begin
             end if;
         end if;
     end process;
-	end generate GEN_proc_Store_SYNC_RST;
-
-	GEN_proc_Store_ASYNC_RSTN: if (ASYNC_RSTN) generate
-    Store: process(clk, rst)
-    begin
-        if (rst = '0') then
-            D_out <= (others => '0');
-        elsif rising_edge(clk) then
-            if (en = '1') then
-                D_out <= D_in;
-            end if;
-        end if;
-    end process;
-    end generate GEN_proc_Store_ASYNC_RSTN;
 
 end Behavioral;
