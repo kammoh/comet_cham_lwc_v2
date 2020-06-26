@@ -22,6 +22,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.numeric_std.ALL;
+use work.NIST_LWAPI_pkg.ALL;
 
 -- Entity
 ----------------------------------------------------------------------------------
@@ -86,22 +87,42 @@ begin
                 S0_temp0(30 downto 0) & S0_temp0(31);
     
     -- Clock process
-    RF: process(clk)
-    begin
-        if rising_edge(clk) then
-            if (rst = '1' or start = '0') then
-                round_Num   <= 0;
-                
-            elsif (rst = '0' and start = '1') then
-                round_Num   <= round_Num + 1;
-    
-                S0_Up       <= S1;
-                S1_Up       <= S2;
-                S2_Up       <= S3;
-                S3_Up       <= S0_temp1;
+    GEN_proc_RF_SYNC_RST: if (not ASYNC_RSTN) generate
+        RF: process(clk)
+        begin
+            if rising_edge(clk) then
+                if (rst = '1' or start = '0') then
+                    round_Num   <= 0;
+                    
+                elsif (rst = '0' and start = '1') then
+                    round_Num   <= round_Num + 1;
+        
+                    S0_Up       <= S1;
+                    S1_Up       <= S2;
+                    S2_Up       <= S3;
+                    S3_Up       <= S0_temp1;
 
+                end if;
             end if;
-        end if;
-    end process RF;
+        end process RF;
+    end generate GEN_proc_RF_SYNC_RST;
+    GEN_proc_RF_ASYNC_RSTN: if (ASYNC_RSTN) generate
+        RF: process(clk, rst)
+        begin
+            if (rst = '0') then
+                round_Num   <= 0;
+            elsif rising_edge(clk) then
+                if (start = '1') then
+                    round_Num   <= round_Num + 1;
+                    S0_Up       <= S1;
+                    S1_Up       <= S2;
+                    S2_Up       <= S3;
+                    S3_Up       <= S0_temp1;
+                else
+                    round_Num   <= 0;
+                end if;
+            end if;
+        end process RF;
+    end generate GEN_proc_RF_ASYNC_RSTN;
 
 end Behavioral;
