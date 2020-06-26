@@ -9,8 +9,8 @@
 ----------------------------------------------------------------------------------
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.STD_LOGIC_UNSIGNED.ALL;
-use work.SomeFunction.all;
+use IEEE.numeric_std.ALL;
+use work.SomeFunctions.all;
 --use work.design_pkg.all;
 
 -- Entity

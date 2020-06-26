@@ -62,7 +62,7 @@ end CryptoCore;
 
 -- Architecture
 ------------------------------------------------------------------------------
-architecture Behavorial of CryptoCore is
+architecture behavioral of CryptoCore is
 
 
 ------------------------------------------------------------------------------
@@ -104,4 +104,4 @@ begin
         msg_auth_ready  => msg_auth_ready 
     );
 
-end Behavorial;
+end behavioral;

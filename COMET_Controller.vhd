@@ -9,8 +9,8 @@
 ----------------------------------------------------------------------------------
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.STD_LOGIC_UNSIGNED.ALL;
-use work.SomeFunction.all;
+use IEEE.numeric_std.ALL;
+use work.SomeFunctions.all;
 --use work.design_pkg.all;
 
 -- Entity
@@ -130,15 +130,15 @@ begin
                 if (ctr_words_rst = '1') then
                     ctr_words   <= "000";
                 elsif (ctr_words_inc = '1') then
-                    ctr_words   <= ctr_words + 1;
+                    ctr_words   <= std_logic_vector(unsigned(ctr_words) + 1);
                 end if;
                 
                 if (ctr_bytes_rst = '1') then
                     ctr_bytes   <= "00000";
                 elsif (ctr_bytes_inc = '1') then
-                    ctr_bytes   <= ctr_bytes + bdi_size;
+                    ctr_bytes   <= std_logic_vector(unsigned(ctr_bytes) + unsigned(bdi_size));
                 elsif (ctr_bytes_dec = '1') then
-                    ctr_bytes   <= ctr_bytes - 4;
+                    ctr_bytes   <= std_logic_vector(unsigned(ctr_bytes) - 4);
                 end if;
 
                 if (decrypt_rst = '1') then
@@ -231,7 +231,7 @@ begin
                 key_ready           <= '1';
                 KeyReg128_en        <= '1'; -- We need to register the key for decryption
                 ctr_words_inc       <= '1';
-                if (ctr_words = 3) then
+                if (SLV_EQ_INT(ctr_words, 3)) then
                     ctr_words_rst   <= '1'; 
                     next_state      <= wait_Npub;
                 else
@@ -258,7 +258,7 @@ begin
                 if (bdi_eoi = '1') then -- No AD and no data
                     bdi_eoi_set     <= '1';
                 end if;
-                if (ctr_words = 3) then 
+                if (SLV_EQ_INT(ctr_words, 3)) then 
                     ctr_words_rst   <= '1';
                     ZstateReg_en    <= '1';                      
                     YstateReg_en    <= '1';                   
@@ -301,18 +301,18 @@ begin
                 if (bdi_eoi = '1') then -- No block of M
                     bdi_eoi_set         <= '1';
                 end if;
-                if (first_ADM_reg = '1' and (bdi_eot = '1' or ctr_words = 3)) then --First block of AD
+                if (first_ADM_reg = '1' and (bdi_eot = '1' or SLV_EQ_INT(ctr_words, 3))) then --First block of AD
                     first_ADM_rst        <= '1';
                     Z_ctrl_mux_sel      <= "001"; -- Ctrl_ad
-                    if (bdi_size /= "100" or ctr_words /= 3) then -- First and partial last block of AD 
+                    if (bdi_size /= "100" or SLV_NEQ_INT(ctr_words, 3)) then -- First and partial last block of AD 
                         Z_ctrl_mux_sel  <= "011"; -- Ctrl_ad + Ctrl_p_ad
                     end if;
                 elsif (bdi_eot = '1') then -- Last block of AD
-                    if (bdi_size /= "100" or ctr_words /= 3) then -- Partial last block
+                    if (bdi_size /= "100" or SLV_NEQ_INT(ctr_words, 3)) then -- Partial last block
                         Z_ctrl_mux_sel  <= "010"; -- Ctrl_p_ad
                     end if;                  
                 end if;               
-                if (bdi_eot = '1' or ctr_words = 3) then -- Have gotten a full block of AD
+                if (bdi_eot = '1' or SLV_EQ_INT(ctr_words, 3)) then -- Have gotten a full block of AD
                     ctr_words_rst       <= '1';
                     ZstateReg_en        <= '1';
                     next_state          <= process_AD;
@@ -351,18 +351,18 @@ begin
                 else
                     bdi_eot_rst         <= '1';
                 end if;  
-                if (first_ADM_reg = '1' and (bdi_eot = '1' or ctr_words = 3)) then --First block of M
+                if (first_ADM_reg = '1' and (bdi_eot = '1' or SLV_EQ_INT(ctr_words, 3))) then --First block of M
                     first_ADM_rst       <= '1';
                     Zstate_mux_sel      <= "011"; -- Ctrl_m
-                    if (bdi_size /= "100" or ctr_words /= 3) then -- First and partial last block of M  
+                    if (bdi_size /= "100" or SLV_NEQ_INT(ctr_words, 3)) then -- First and partial last block of M  
                         Z_ctrl_mux_sel  <= "101"; -- Ctrl_p_m
                     end if;
                 elsif (bdi_eot = '1') then -- Last block of m
-                    if (bdi_size /= "100" or ctr_words /= 3) then -- Partial last block
+                    if (bdi_size /= "100" or SLV_NEQ_INT(ctr_words, 3)) then -- Partial last block
                         Z_ctrl_mux_sel  <= "101"; -- Ctrl_p_m
                     end if;                  
                 end if;         
-                if (bdi_eot = '1' or ctr_words = 3) then -- Have gotten a block of M
+                if (bdi_eot = '1' or SLV_EQ_INT(ctr_words, 3)) then -- Have gotten a block of M
                     ctr_words_rst       <= '1';
                     ZstateReg_en        <= '1';
                     next_state          <= process_data;
@@ -387,10 +387,10 @@ begin
                 bdo_valid               <= '1';
                 ctr_words_inc           <= '1';
                 ctr_bytes_dec           <= '1';               
-                if (ctr_bytes <= 4) then -- Last 4 bytes of M
+                if (SLV_LTE_INT(ctr_bytes, 4)) then -- Last 4 bytes of M
                     end_of_block        <= bdi_eot_reg; -- Indicates the last block of M
                 end if;
-                if (ctr_words = 3 or ctr_bytes <= 4) then -- One block of CT is extracted
+                if (SLV_EQ_INT(ctr_words, 3) or SLV_LTE_INT(ctr_bytes, 4)) then -- One block of CT is extracted
                     ctr_words_rst       <= '1';
                     ctr_bytes_rst       <= '1';
                     iDataReg_rst        <= '1';
@@ -422,7 +422,7 @@ begin
                 bdo_valid           <= '1';
                 bdo_t_mux_sel       <= '1';
                 ctr_words_inc       <= '1';
-                if (ctr_words = 3) then
+                if (SLV_EQ_INT(ctr_words, 3)) then
                     end_of_block    <= '1'; -- Last word of Tag
                     ctr_words_rst   <= '1';
                     next_state      <= idle;
@@ -435,7 +435,7 @@ begin
                 iDataReg_en         <= '1';
                 iData_mux_sel       <= '0';
                 ctr_words_inc       <= '1';
-                if (ctr_words = 3) then
+                if (SLV_EQ_INT(ctr_words, 3)) then
                     ctr_words_rst   <= '1';
                     next_state      <= verify_tag;
                 else

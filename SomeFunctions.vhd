@@ -19,11 +19,11 @@
 ----------------------------------------------------------------------------------
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.STD_LOGIC_UNSIGNED.ALL;
+use IEEE.numeric_std.ALL;
 
 -- Declarations
 ----------------------------------------------------------------------------------
-package SomeFunction is
+package SomeFunctions is
     
     function pad      (I         : in std_logic_vector(127 downto 0);
                        bytes_Num : in natural) return std_logic_vector;
@@ -36,13 +36,19 @@ package SomeFunction is
     function chop     (output    : in std_logic_vector(31 downto 0);
                        bdi_size  : in std_logic_vector(4 downto 0)) return std_logic_vector;  
     function BE2LE    (output    : in std_logic_vector(31 downto 0)) return std_logic_vector;
-                  
     
-end package SomeFunction;
+    function SLV_EQ_INT (slv: in std_logic_vector; int: in integer ) return boolean;
+    function SLV_NEQ_INT (slv: in std_logic_vector; int: in integer ) return boolean;
+    function SLV_LTE_INT(slv: in std_logic_vector; int: in integer ) return boolean;
+    function SLV_GT_INT(slv: in std_logic_vector; int: in integer ) return boolean;
+    function conv_integer(slv: in std_logic_vector) return integer;
+    function conv_std_logic_vector(int: in integer; sz: in integer) return std_logic_vector;
+    
+end package SomeFunctions;
 
 -- Body
 ----------------------------------------------------------------------------------
-package body SomeFunction is
+package body SomeFunctions is
 
     -- Padding --------------------------------------------------
     function pad (I : in std_logic_vector(127 downto 0); bytes_Num : in natural) return std_logic_vector is
@@ -99,11 +105,11 @@ package body SomeFunction is
                     ctr_words : in std_logic_vector(2 downto 0)) return std_logic_vector is
     variable temp : std_logic_vector(127 downto 0);
     begin
-        if (ctr_words = 0) then
+        if (ctr_words = std_logic_vector(to_unsigned(0, ctr_words'length))) then
             temp := Reg_out(127 downto 32) & bdi;
-        elsif (ctr_words = 1) then
+        elsif (ctr_words = std_logic_vector(to_unsigned(1, ctr_words'length))) then
             temp := Reg_out(127 downto 64) & bdi & Reg_out(31 downto 0);
-        elsif (ctr_words = 2) then
+        elsif (ctr_words = std_logic_vector(to_unsigned(2, ctr_words'length))) then
             temp := Reg_out(127 downto 96) & bdi & Reg_out(63 downto 0);
         else
             temp := bdi & Reg_out(95 downto 0);
@@ -115,11 +121,11 @@ package body SomeFunction is
     function chop (output : in std_logic_vector(31 downto 0); bdi_size : in std_logic_vector(4 downto 0)) return std_logic_vector is
     variable temp : std_logic_vector(31 downto 0);
     begin
-        if (bdi_size = 1) then
+        if (bdi_size = std_logic_vector(to_unsigned(1, bdi_size'length))) then
             temp := output(31 downto 24) & x"000000";
-        elsif (bdi_size = 2) then
+        elsif (bdi_size = std_logic_vector(to_unsigned(2, bdi_size'length))) then
             temp := output(31 downto 16) & x"0000";
-        elsif (bdi_size = 3) then
+        elsif (bdi_size = std_logic_vector(to_unsigned(3, bdi_size'length))) then
             temp := output(31 downto 8) & x"00";
         else
             temp := output;
@@ -132,6 +138,38 @@ package body SomeFunction is
     begin
         return output(7 downto 0) & output(15 downto 8) & output(23 downto 16) & output(31 downto 24);
     end function;
+
+    -- SLV (std_logic_vector) is equal to int (integer) ----------------------------------------------
+    function SLV_EQ_INT(slv: in std_logic_vector; int: in integer ) return boolean is
+    begin
+        return (unsigned(slv) = to_unsigned(int, slv'length));
+    end function;
     
-end package body SomeFunction;
+    -- SLV (std_logic_vector) is NOT equal to int (integer) ----------------------------------------------
+    function SLV_NEQ_INT(slv: in std_logic_vector; int: in integer ) return boolean is
+    begin
+        return not SLV_EQ_INT(slv , int);
+    end function;    
+    -- SLV (std_logic_vector) is less-than-or-equal (<=) to int (integer) ----------------------------------------------
+    function SLV_LTE_INT(slv: in std_logic_vector; int: in integer ) return boolean is
+    begin
+        return (unsigned(slv) <= to_unsigned(int, slv'length));
+    end function;
+    -- SLV (std_logic_vector) is less-than-or-equal (<=) to int (integer) ----------------------------------------------
+    function SLV_GT_INT(slv: in std_logic_vector; int: in integer ) return boolean is
+    begin
+        return (unsigned(slv) > to_unsigned(int, slv'length));
+    end function;    
+    -- slv to integer ----------------------------------------------
+    function conv_integer(slv: in std_logic_vector) return integer is
+    begin
+        return to_integer(to_01(unsigned(slv)));
+    end function;    
+    -- integer to slv ----------------------------------------------
+    function conv_std_logic_vector(int: in integer; sz: in integer) return std_logic_vector is
+    begin
+        return std_logic_vector(to_unsigned(int,sz));
+    end function;
+    
+end package body SomeFunctions;
 

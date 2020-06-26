@@ -21,8 +21,7 @@
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.STD_LOGIC_UNSIGNED.ALL;
-use IEEE.STD_LOGIC_ARITH.ALL;
+use IEEE.numeric_std.ALL;
 
 -- Entity
 ----------------------------------------------------------------------------------
@@ -80,8 +79,8 @@ begin
     RK(6)   <= K3 xor (K3(30 downto 0) & K3(31)) xor (K3(20 downto 0) & K3(31 downto 21));
     
     -- ARX
-    S0_temp0 <= (S0 xor conv_std_logic_vector(round_Num,32)) + ((S1(30 downto 0) & S1(31)) xor RK(round_Num mod 8)) when (round_Num mod 2 = 0) else
-                (S0 xor conv_std_logic_vector(round_Num,32)) + ((S1(23 downto 0) & S1(31 downto 24)) xor RK(round_Num mod 8));
+    S0_temp0 <= std_logic_vector((unsigned(S0) xor to_unsigned(round_Num,32)) + unsigned((S1(30 downto 0) & S1(31)) xor RK(round_Num mod 8))) when (round_Num mod 2 = 0) else
+                std_logic_vector((unsigned(S0) xor to_unsigned(round_Num,32)) + unsigned((S1(23 downto 0) & S1(31 downto 24)) xor RK(round_Num mod 8)));
     
     S0_temp1 <= S0_temp0(23 downto 0) & S0_temp0(31 downto 24) when (round_Num mod 2 = 0) else
                 S0_temp0(30 downto 0) & S0_temp0(31);
