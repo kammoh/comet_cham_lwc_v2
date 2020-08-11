@@ -22,7 +22,9 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.numeric_std.ALL;
+
 use work.NIST_LWAPI_pkg.ALL;
+use work.design_pkg.ASYNC_RSTN;
 
 -- Entity
 ----------------------------------------------------------------------------------

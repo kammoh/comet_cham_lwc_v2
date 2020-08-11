@@ -17,6 +17,9 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.all;
 
 package Design_pkg is
+    --! Asynchronous and active-low reset.
+    --! Can be set to `True` when targeting ASICs given that your CryptoCore supports it.
+    constant ASYNC_RSTN      : boolean := false;
     
     --! Adjust the bit counter widths to reduce ressource consumption.
     -- Range definition must not change.

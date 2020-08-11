@@ -10,8 +10,10 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.numeric_std.ALL;
+
 use work.SomeFunctions.all;
 use work.NIST_LWAPI_pkg.all;
+use work.design_pkg.ASYNC_RSTN;
 
 -- Entity
 ----------------------------------------------------------------------------------
