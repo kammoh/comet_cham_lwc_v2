@@ -1,0 +1,4 @@
+[submodule "LWC"]
+	path = LWC
+	url = https://github.com/GMUCERG/LWC.git
+	branch = asic

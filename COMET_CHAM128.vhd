@@ -67,8 +67,8 @@ architecture Behavioral of COMET_CHAM128 is
     signal iDataReg_en      : std_logic;
     signal iData_mux_sel    : std_logic;
     
-    signal oDataReg_rst     : std_logic;
-    signal oDataReg_en      : std_logic;
+    -- signal oDataReg_rst     : std_logic;
+    -- signal oDataReg_en      : std_logic;
     
     signal ZstateReg_rst    : std_logic;
     signal ZstateReg_en     : std_logic;
@@ -92,7 +92,7 @@ begin
         bdi             => bdi,
         bdi_size        => bdi_size,
         key             => key,
-        bdo            => bdo,
+        bdo             => bdo,
         msg_auth        => msg_auth,
         CHAM_start      => CHAM_start,
         CHAM_done       => CHAM_done,
